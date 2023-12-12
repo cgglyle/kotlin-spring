@@ -32,4 +32,28 @@ class BeanContainerTest {
             val bean = beanContainer.getBean("testClassB")
         }
     }
+
+    @Test
+    fun getBeanNewInstance() {
+        //given
+        val beanContainer = BeanContainer()
+        beanContainer.saveBeanDefinition("testClassA", TestClassA::class.java)
+
+        //when
+        val bean = beanContainer.getBean("testClassA")
+
+        //then
+        Assertions.assertNotNull(bean)
+    }
+
+    @Test
+    fun getBeanButDefinitionDoesNotExistShouldThrowException() {
+        //given
+        val beanContainer = BeanContainer()
+
+        //when
+        Assertions.assertThrows(BeanException::class.java) {
+            beanContainer.getBean("testClassB")
+        }
+    }
 }
