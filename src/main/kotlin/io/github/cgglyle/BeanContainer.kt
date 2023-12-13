@@ -43,8 +43,14 @@ class BeanContainer {
             if (!declaredField.canAccess(bean)) {
                 declaredField.trySetAccessible()
             }
-            // 注入依赖
-            declaredField.set(bean, it.value)
+            // is 关键字等同于 instanceof, 而且 is 关键字会自动将在上下文中将 value 转换为 BeanReference，不用显式转换。
+            if (it.value is BeanReference) {
+                // 通过 getBean 获得 Bean
+                declaredField.set(bean, getBean(it.value.beanName))
+            } else {
+                // 注入依赖
+                declaredField.set(bean, it.value)
+            }
         }
     }
 }
