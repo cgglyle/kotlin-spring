@@ -110,4 +110,30 @@ class BeanContainerTest {
         //as 关键字为强制转换的意思，等同于 (TestClasB) beanB
         Assertions.assertEquals(beanA, (beanB as TestClassB).testClassA)
     }
+
+    @Test
+    fun circularDependencyTest() {
+        //given
+        val beanContainer = BeanContainer()
+
+        val beanDefinitionC = BeanDefinition(TestClassC::class.java)
+        beanDefinitionC.setProperty("testClassD", BeanReference("testClassD"))
+        beanContainer.saveBeanDefinition("testClassC", beanDefinitionC)
+
+        val beanDefinitionD = BeanDefinition(TestClassD::class.java)
+        beanDefinitionD.setProperty("testClassC", BeanReference("testClassC"))
+        beanContainer.saveBeanDefinition("testClassD", beanDefinitionD)
+
+
+        //when
+        val beanC = beanContainer.getBean("testClassC") as TestClassC
+        val beanD = beanContainer.getBean("testClassD") as TestClassD
+
+        //then
+        Assertions.assertNotNull(beanC)
+        Assertions.assertNotNull(beanD)
+
+        Assertions.assertNotNull(beanC.testClassD)
+        Assertions.assertNotNull(beanD.testClassC)
+    }
 }
