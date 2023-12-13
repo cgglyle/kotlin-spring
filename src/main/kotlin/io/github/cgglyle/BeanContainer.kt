@@ -2,6 +2,7 @@ package io.github.cgglyle
 
 class BeanContainer {
     private val container: MutableMap<String, Any> = mutableMapOf()
+
     // 用于存储 bean 的定义
     private val beanDefinitions: MutableMap<String, BeanDefinition> = mutableMapOf()
 
@@ -28,6 +29,22 @@ class BeanContainer {
         val instance = beanClass.getDeclaredConstructor().newInstance()
         // 如果 bean 的定义是单例模式，就将创建出的 bean 加入容器
         if (beanDefinition.scope == BeanScope.SINGLETON) saveBean(beanName, instance)
+        // 注入依赖
+        doInjectProperty(beanDefinition, instance, beanClass)
         return instance
+    }
+
+    private fun doInjectProperty(beanDefinition: BeanDefinition, bean: Any, beanClass: Class<*>) {
+        // 循环依赖
+        beanDefinition.propertyValues.forEach {
+            // 使用反射找到与依赖名称相同的方法
+            val declaredField = beanClass.getDeclaredField(it.name)
+            // 如果方法不能访问，就设置访问
+            if (!declaredField.canAccess(bean)) {
+                declaredField.trySetAccessible()
+            }
+            // 注入依赖
+            declaredField.set(bean, it.value)
+        }
     }
 }

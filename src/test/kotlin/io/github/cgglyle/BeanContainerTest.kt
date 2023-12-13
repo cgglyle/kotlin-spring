@@ -73,4 +73,20 @@ class BeanContainerTest {
         //then
         Assertions.assertNotEquals(beanA, beanB)
     }
+
+    @Test
+    fun getBeanClassANameMustNotBeNull() {
+        //given
+        val beanContainer = BeanContainer()
+        val beanDefinitionA = BeanDefinition(TestClassA::class.java)
+        beanDefinitionA.setProperty("name", "testClassA")
+        beanContainer.saveBeanDefinition("testClassA", beanDefinitionA)
+
+        //when
+        val beanA = beanContainer.getBean("testClassA")
+
+        //then
+        //as 关键字为强制转换的意思，等同于 (TestClasB) beanB
+        Assertions.assertEquals("testClassA", (beanA as TestClassA).name)
+    }
 }
