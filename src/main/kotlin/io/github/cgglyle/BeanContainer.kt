@@ -7,8 +7,10 @@ class BeanContainer {
 
     // 用于存储 bean 的定义
     private val beanDefinitions: MutableMap<String, BeanDefinition> = mutableMapOf()
+
     // 早期未实例化的 Bean 容器
     private val earlyBeanContainer: MutableMap<String, Any> = mutableMapOf()
+
     // 循环依赖标记
     private val earlyMarks: MutableList<String> = mutableListOf()
 
@@ -22,7 +24,11 @@ class BeanContainer {
 
     fun saveBean(beanName: String, bean: Any) {
         // 这里也是语法糖，等同 container.put(beanName, bean)
-        container[beanName] = bean
+        synchronized(container) {
+            this.container[beanName] = bean
+            this.earlyBeanContainer.remove(beanName)
+            this.earlyMarks.remove(beanName)
+        }
     }
 
     fun saveBeanDefinition(beanName: String, beanDefinition: BeanDefinition) {
@@ -34,17 +40,17 @@ class BeanContainer {
         // 反射创建
         val instance = beanClass.getDeclaredConstructor().newInstance()
         // 注入依赖
-        // 注入前添加标记
-        earlyMarks.add(beanName)
-        doInjectProperty(beanDefinition, instance, beanClass)
-        // 注入后删除标记
-        earlyMarks.remove(beanName)
+        doInjectProperty(beanName, beanDefinition, instance, beanClass)
         // 如果 bean 的定义是单例模式，就将创建出的 bean 加入容器
         if (beanDefinition.scope == BeanScope.SINGLETON) saveBean(beanName, instance)
         return instance
     }
 
-    private fun doInjectProperty(beanDefinition: BeanDefinition, bean: Any, beanClass: Class<*>) {
+    private fun doInjectProperty(beanName: String, beanDefinition: BeanDefinition, bean: Any, beanClass: Class<*>) {
+        // 注入前添加标记
+        earlyMarks.add(beanName)
+        // 将 Bean 临时放入早期容器
+        earlyBeanContainer[beanName] = bean
         // 循环依赖
         beanDefinition.propertyValues.forEach {
             // 使用反射找到与依赖名称相同的方法
@@ -57,16 +63,22 @@ class BeanContainer {
             if (it.value is BeanReference) {
                 // 当标记中已经存在正要注入的名字，就是循环依赖
                 if (earlyMarks.contains(it.name)) {
-                    val stringBuilder = StringBuilder()
-                    val firstBeanName = earlyMarks[0]
-                    earlyMarks.forEach{
-                        stringBuilder.append(it).append(" -> ")
+                    // 从早期容器中找出早期 Bean
+                    val earlyBean = earlyBeanContainer[it.name]
+                    if (earlyBean == null) {
+                        val stringBuilder = StringBuilder()
+                        val firstBeanName = earlyMarks[0]
+                        earlyMarks.forEach {
+                            stringBuilder.append(it).append(" -> ")
+                        }
+                        stringBuilder.append(firstBeanName)
+                        throw BeanException("发生循环依赖！$stringBuilder")
                     }
-                    stringBuilder.append(firstBeanName)
-                    throw BeanException("发生循环依赖！$stringBuilder")
+                    declaredField.set(bean, earlyBean)
+                } else {
+                    // 通过 getBean 获得 Bean
+                    declaredField.set(bean, getBean(it.value.beanName))
                 }
-                // 通过 getBean 获得 Bean
-                declaredField.set(bean, getBean(it.value.beanName))
             } else {
                 // 注入依赖
                 declaredField.set(bean, it.value)

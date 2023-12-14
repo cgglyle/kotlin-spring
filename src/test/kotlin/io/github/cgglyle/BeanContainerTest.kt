@@ -118,22 +118,34 @@ class BeanContainerTest {
 
         val beanDefinitionC = BeanDefinition(TestClassC::class.java)
         beanDefinitionC.setProperty("testClassD", BeanReference("testClassD"))
+        beanDefinitionC.setProperty("testClassE", BeanReference("testClassE"))
         beanContainer.saveBeanDefinition("testClassC", beanDefinitionC)
 
         val beanDefinitionD = BeanDefinition(TestClassD::class.java)
         beanDefinitionD.setProperty("testClassC", BeanReference("testClassC"))
+        beanDefinitionD.setProperty("testClassE", BeanReference("testClassE"))
         beanContainer.saveBeanDefinition("testClassD", beanDefinitionD)
 
+        val beanDefinitionE = BeanDefinition(TestClassE::class.java)
+        beanDefinitionE.setProperty("testClassC", BeanReference("testClassC"))
+        beanDefinitionE.setProperty("testClassD", BeanReference("testClassD"))
+        beanContainer.saveBeanDefinition("testClassE", beanDefinitionE)
 
         //when
         val beanC = beanContainer.getBean("testClassC") as TestClassC
         val beanD = beanContainer.getBean("testClassD") as TestClassD
+        val beanE = beanContainer.getBean("testClassE") as TestClassE
 
         //then
         Assertions.assertNotNull(beanC)
         Assertions.assertNotNull(beanD)
+        Assertions.assertNotNull(beanE)
 
-        Assertions.assertNotNull(beanC.testClassD)
-        Assertions.assertNotNull(beanD.testClassC)
+        Assertions.assertEquals(beanC.testClassD, beanD)
+        Assertions.assertEquals(beanC.testClassE, beanE)
+        Assertions.assertEquals(beanD.testClassC, beanC)
+        Assertions.assertEquals(beanD.testClassE, beanE)
+        Assertions.assertEquals(beanE.testClassC, beanC)
+        Assertions.assertEquals(beanE.testClassD, beanD)
     }
 }

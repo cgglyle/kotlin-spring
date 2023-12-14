@@ -1,6 +1,6 @@
 package io.github.cgglyle
 
-class TestClassC {
+class TestClassE {
+    lateinit var testClassC: TestClassC
     lateinit var testClassD: TestClassD
-    lateinit var testClassE: TestClassE
 }
