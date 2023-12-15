@@ -20,7 +20,7 @@ class ComponentScanProcessor {
                 .replace("/", ".")
                 .substringBeforeLast(".class")
             Class.forName(classPath)
-        }
+        }.filter { isBean(it) }
         return classList
     }
 
@@ -43,5 +43,10 @@ class ComponentScanProcessor {
             pathList.add(file.path)
         }
         return pathList.toList()
+    }
+
+    private fun isBean(clazz: Class<*>): Boolean {
+        val componentAnnotation = clazz.getDeclaredAnnotation(Component::class.java)
+        return componentAnnotation != null
     }
 }
