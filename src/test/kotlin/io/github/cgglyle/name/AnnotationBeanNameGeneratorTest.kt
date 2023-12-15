@@ -1,7 +1,7 @@
 package io.github.cgglyle.name
 
-import io.github.cgglyle.AnnotationBeanNameGenerator
-import io.github.cgglyle.BeanDefinition
+import io.github.cgglyle.scan.AnnotationBeanNameGenerator
+import io.github.cgglyle.bean.BeanDefinition
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

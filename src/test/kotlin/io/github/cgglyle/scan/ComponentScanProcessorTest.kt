@@ -1,14 +1,10 @@
 package io.github.cgglyle.scan
 
-import io.github.cgglyle.AnnotationBeanNameGenerator
-import io.github.cgglyle.BeanContainer
-import io.github.cgglyle.BeanDefinition
-import io.github.cgglyle.ComponentScanProcessor
+import io.github.cgglyle.bean.BeanContainer
 import io.github.cgglyle.scan.test.TestA
 import io.github.cgglyle.scan.test.dir.TestC
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import kotlin.contracts.contract
 
 class ComponentScanProcessorTest {
 

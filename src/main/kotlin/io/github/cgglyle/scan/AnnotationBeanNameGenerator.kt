@@ -1,4 +1,6 @@
-package io.github.cgglyle
+package io.github.cgglyle.scan
+
+import io.github.cgglyle.bean.BeanDefinition
 
 class AnnotationBeanNameGenerator {
     fun generatorBeanName(beanDefinition: BeanDefinition): String {

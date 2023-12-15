@@ -1,5 +1,7 @@
-package io.github.cgglyle
+package io.github.cgglyle.scan
 
+import io.github.cgglyle.Component
+import io.github.cgglyle.bean.BeanDefinition
 import java.io.File
 
 class ComponentScanProcessor {
