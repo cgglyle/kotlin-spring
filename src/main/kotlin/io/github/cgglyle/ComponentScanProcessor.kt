@@ -3,7 +3,12 @@ package io.github.cgglyle
 import java.io.File
 
 class ComponentScanProcessor {
-    fun scan(path: String): List<Class<*>> {
+    fun scan(path: String): List<BeanDefinition> {
+        val classList = scanClassPath(path)
+        return classList.map { doBeanDefinitionParse(it) }
+    }
+
+    private fun scanClassPath(path: String): List<Class<*>> {
         // io.github.cgglyle -> io/github/cgglyle
         val filePath = path.replace(".", "/")
         // 从 ClassLoader 中取出资源，因为在系统启动时会配置 ClassPath，这样我们就可以取出绝对路径
@@ -48,5 +53,9 @@ class ComponentScanProcessor {
     private fun isBean(clazz: Class<*>): Boolean {
         val componentAnnotation = clazz.getDeclaredAnnotation(Component::class.java)
         return componentAnnotation != null
+    }
+
+    private fun doBeanDefinitionParse(clazz: Class<*>): BeanDefinition {
+        return BeanDefinition(clazz)
     }
 }
