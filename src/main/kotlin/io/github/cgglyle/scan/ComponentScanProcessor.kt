@@ -1,7 +1,9 @@
 package io.github.cgglyle.scan
 
+import io.github.cgglyle.Autowired
 import io.github.cgglyle.Component
 import io.github.cgglyle.bean.BeanDefinition
+import io.github.cgglyle.bean.BeanReference
 import java.io.File
 
 class ComponentScanProcessor {
@@ -58,6 +60,12 @@ class ComponentScanProcessor {
     }
 
     private fun doBeanDefinitionParse(clazz: Class<*>): BeanDefinition {
-        return BeanDefinition(clazz)
+        val beanDefinition = BeanDefinition(clazz)
+        clazz.declaredFields.forEach {
+            if (it.getDeclaredAnnotation(Autowired::class.java) != null) {
+                beanDefinition.setProperty(it.name, BeanReference(it.name))
+            }
+        }
+        return beanDefinition
     }
 }

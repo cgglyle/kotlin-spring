@@ -42,4 +42,28 @@ class ComponentScanProcessorTest {
         Assertions.assertNotNull(beanA)
         Assertions.assertNotNull(beanC)
     }
+
+    @Test
+    fun testAutowired() {
+        //given
+        val componentScanProcessor = ComponentScanProcessor()
+        val beanDefinitions = componentScanProcessor.scan("io.github.cgglyle.scan.test")
+        val beanContainer = BeanContainer()
+        val annotationBeanNameGenerator = AnnotationBeanNameGenerator()
+        val pairs = beanDefinitions.map { Pair(annotationBeanNameGenerator.generatorBeanName(it), it) }
+        pairs.forEach { (beanName, beanDefinition) ->
+            beanContainer.saveBeanDefinition(beanName, beanDefinition)
+        }
+
+        // when
+        val beanA = beanContainer.getBean("testA") as TestA
+        val beanC = beanContainer.getBean("testC") as TestC
+
+        // then
+        Assertions.assertNotNull(beanA)
+        Assertions.assertNotNull(beanC)
+        Assertions.assertEquals(beanA, beanC.testA)
+        Assertions.assertEquals(false, beanC.testCIsInitialized())
+        Assertions.assertEquals(beanA, beanA.testA)
+    }
 }
