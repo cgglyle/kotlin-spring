@@ -1,4 +1,4 @@
-package io.github.cgglyle
+package io.github.cgglyle.bean
 
 class TestClassE {
     lateinit var testClassC: TestClassC

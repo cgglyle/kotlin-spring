@@ -1,5 +1,6 @@
-package io.github.cgglyle
+package io.github.cgglyle.bean
 
+import io.github.cgglyle.*
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
