@@ -4,6 +4,7 @@ import io.github.cgglyle.bean.BeanContainer
 import io.github.cgglyle.scan.test.TestA
 import io.github.cgglyle.scan.test.dir.TestC
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class ComponentScanProcessorTest {
@@ -22,8 +23,9 @@ class ComponentScanProcessorTest {
         Assertions.assertTrue(scan.any { it.type == TestC::class.java })
     }
 
-    @Test
-    fun testCLassPathGetBean() {
+    private lateinit var beanContainer: BeanContainer
+    @BeforeEach
+    fun setUp() {
         //given
         val componentScanProcessor = ComponentScanProcessor()
         val beanDefinitions = componentScanProcessor.scan("io.github.cgglyle.scan.test")
@@ -33,7 +35,11 @@ class ComponentScanProcessorTest {
         pairs.forEach { (beanName, beanDefinition) ->
             beanContainer.saveBeanDefinition(beanName, beanDefinition)
         }
+        this.beanContainer = beanContainer
+    }
 
+    @Test
+    fun testCLassPathGetBean() {
         // when
         val beanA = beanContainer.getBean("testA")
         val beanC = beanContainer.getBean("testC")
@@ -45,16 +51,6 @@ class ComponentScanProcessorTest {
 
     @Test
     fun testAutowired() {
-        //given
-        val componentScanProcessor = ComponentScanProcessor()
-        val beanDefinitions = componentScanProcessor.scan("io.github.cgglyle.scan.test")
-        val beanContainer = BeanContainer()
-        val annotationBeanNameGenerator = AnnotationBeanNameGenerator()
-        val pairs = beanDefinitions.map { Pair(annotationBeanNameGenerator.generatorBeanName(it), it) }
-        pairs.forEach { (beanName, beanDefinition) ->
-            beanContainer.saveBeanDefinition(beanName, beanDefinition)
-        }
-
         // when
         val beanA = beanContainer.getBean("testA") as TestA
         val beanC = beanContainer.getBean("testC") as TestC
@@ -65,5 +61,15 @@ class ComponentScanProcessorTest {
         Assertions.assertEquals(beanA, beanC.testA)
         Assertions.assertEquals(false, beanC.testCIsInitialized())
         Assertions.assertEquals(beanA, beanA.testA)
+    }
+
+    @Test
+    fun testScope() {
+        // when
+        val prototypeTest = beanContainer.getBean("prototypeTest")
+        val prototypeTestB = beanContainer.getBean("prototypeTest")
+
+        // then
+        Assertions.assertNotEquals(prototypeTest, prototypeTestB)
     }
 }

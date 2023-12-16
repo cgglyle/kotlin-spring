@@ -60,7 +60,14 @@ class ComponentScanProcessor {
     }
 
     private fun doBeanDefinitionParse(clazz: Class<*>): BeanDefinition {
-        val beanDefinition = BeanDefinition(clazz)
+        val componentAnnotation = clazz.getDeclaredAnnotation(Component::class.java)
+        // if 可以将块中的值返回，实际上 if 本身也是一个表达式，本身和 java 中的三元表达式相同。
+        val beanDefinition = if (componentAnnotation != null) {
+            BeanDefinition(clazz, componentAnnotation.scope)
+        } else {
+            BeanDefinition(clazz)
+        }
+
         clazz.declaredFields.forEach {
             if (it.getDeclaredAnnotation(Autowired::class.java) != null) {
                 beanDefinition.setProperty(it.name, BeanReference(it.name))
